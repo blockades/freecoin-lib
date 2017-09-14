@@ -7,6 +7,7 @@
 
 ;; Sourcecode designed, written and maintained by
 ;; Denis Roio <jaromil@dyne.org>
+;; Aspasia Beneti <aspra@dyne.org>
 
 ;; With contributions by
 ;; Carlo Sciolla
@@ -36,7 +37,11 @@
             [freecoin-lib.utils :as util]
             [simple-time.core :as time]
             [schema.core :as s]
-            [freecoin-lib.freecoin-schema :refer [StoresMap]]))
+            [freecoin-lib.freecoin-schema :refer [StoresMap
+                                                  RPCconfig]]
+            [clj-btc
+             [core :as btc]
+             [config :as btc-conf]]))
 
 (defprotocol Blockchain
   ;; blockchain identifier
@@ -301,3 +306,21 @@ Used to identify the class type."
                              :transactions-atom transactions-atom
                              :accounts-atom accounts-atom
                              :tags-atom tags-atom})))
+
+(s/defrecord Faircoin2 [rpc-config :- RPCconfig]
+  Blockchain
+  (list-accounts [bk]
+    (btc/listaccounts :config rpc-config))
+  
+  (get-address [bk account-id]
+    (btc/getaddressesbyaccount :config rpc-config
+                               :account account-id)))
+
+(s/defn ^:always-validate new-faircoin2
+  ([]
+   (-> (freecoin-lib.config/create-config)
+       (freecoin-lib.config/rpc-config)
+       (new-faircoin2)))
+  ([rpc-config-path :- s/Str]
+   (let [rpc-config (btc-conf/read-local-config rpc-config-path)]
+        (s/validate Faircoin2 (map->Faircoin2 {:rpc-config (dissoc rpc-config :txindex :daemon)})))))

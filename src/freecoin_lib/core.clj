@@ -307,7 +307,7 @@ Used to identify the class type."
                              :accounts-atom accounts-atom
                              :tags-atom tags-atom})))
 
-(s/defrecord Faircoin2 [rpc-config :- RPCconfig]
+(s/defrecord BtcRpc [rpc-config :- RPCconfig]
   Blockchain
   (list-accounts [bk]
     (btc/listaccounts :config rpc-config))
@@ -316,11 +316,11 @@ Used to identify the class type."
     (btc/getaddressesbyaccount :config rpc-config
                                :account account-id)))
 
-(s/defn ^:always-validate new-faircoin2
+(s/defn ^:always-validate new-btc-rpc
   ([]
    (-> (freecoin-lib.config/create-config)
        (freecoin-lib.config/rpc-config)
-       (new-faircoin2)))
+       (new-btc-rpc)))
   ([rpc-config-path :- s/Str]
    (let [rpc-config (btc-conf/read-local-config rpc-config-path)]
-        (s/validate Faircoin2 (map->Faircoin2 {:rpc-config (dissoc rpc-config :txindex :daemon)})))))
+        (s/validate BtcRpc (map->BtcRpc {:rpc-config (dissoc rpc-config :txindex :daemon)})))))

@@ -34,7 +34,9 @@
              [mongo :as mongo]
              [tag :as tag]]
             [freecoin-lib.db.storage :as storage]
-            [freecoin-lib.utils :as util]
+            [freecoin-lib
+             [utils :as util]
+             [config :as config]]
             [simple-time.core :as time]
             [schema.core :as s]
             [freecoin-lib.freecoin-schema :refer [StoresMap
@@ -318,8 +320,8 @@ Used to identify the class type."
 
 (s/defn ^:always-validate new-btc-rpc
   ([]
-   (-> (freecoin-lib.config/create-config)
-       (freecoin-lib.config/rpc-config)
+   (-> (config/create-config)
+       (config/rpc-config)
        (new-btc-rpc)))
   ([rpc-config-path :- s/Str]
    (let [rpc-config (btc-conf/read-local-config rpc-config-path)]
